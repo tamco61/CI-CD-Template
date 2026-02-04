@@ -1,4 +1,6 @@
-name: ci-cd.yml
+name: Python CI/CD Pipeline
+
+# Триггеры запуска
 on:
   push:
     branches:
@@ -6,19 +8,28 @@ on:
   pull_request:
     branches:
       - "main"
+
 jobs:
+  # Джобы которые будут выполняться
+
   code-quality:
+    #CI
+
     runs-on: ubuntu-latest
+    # Выбор OS
 
     steps:
+      # Скачивание кода
       - name: Checkout code
         uses: actions/checkout@v5
 
+      # Установка python
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # Установка и настройка Poetry
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -26,6 +37,7 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
+      # Кэширование зависимостей
       - name: Load cached venv
         id: cached-poetry-dependencies
         uses: actions/cache@v4
@@ -33,19 +45,23 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
 
+      # Установка зависимостей в случае, если кэша нет
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
+      # Проверка Ruff
       - name: Lint with Ruff
         run: |
           poetry run ruff check .
           poetry run ruff format --check .
 
+      # Тесты
       - name: Test with Pytest
         run: poetry run pytest
 
   docker-build:
+    # CD
     needs: code-quality
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
