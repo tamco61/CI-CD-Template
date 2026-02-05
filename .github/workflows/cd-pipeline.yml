@@ -2,9 +2,6 @@ name: Manual Python CD Pipeline
 
 on:
   workflow_dispatch:
-    inputs:
-      enviroment:
-        default: "dev"
 jobs:
   docker-build:
     # CD

@@ -2,6 +2,7 @@ name: Python CI Pipeline
 
 # Триггеры запуска
 on:
+  workflow_dispatch: 
   push:
     branches:
       - "main"
